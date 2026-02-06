@@ -1,0 +1,372 @@
+[
+  {
+    "Id": "chassis_starter_01",
+    "Name": "Rusty Crate",
+    "Description": "A welded metal box. It barely holds together.",
+    "Type": 0,
+    "Category": "Core",
+    "IsCore": true,
+    "ModelPath": "models/chassis_starter.glb",
+    "Mass": 100.0,
+    "Cost": 0,
+    "Connectors": [
+      {
+        "Id": "wheel_fl",
+        "Position": [
+          -1.0,
+          0,
+          1.0
+        ],
+        "Rotation": [
+          0,
+          0,
+          90
+        ],
+        "CompatibleTypes": [
+          "Wheel"
+        ]
+      },
+      {
+        "Id": "wheel_fr",
+        "Position": [
+          1.0,
+          0,
+          1.0
+        ],
+        "Rotation": [
+          0,
+          0,
+          90
+        ],
+        "CompatibleTypes": [
+          "Wheel"
+        ]
+      },
+      {
+        "Id": "wheel_bl",
+        "Position": [
+          -1.0,
+          0,
+          -1.0
+        ],
+        "Rotation": [
+          0,
+          0,
+          90
+        ],
+        "CompatibleTypes": [
+          "Wheel"
+        ]
+      },
+      {
+        "Id": "wheel_br",
+        "Position": [
+          1.0,
+          0,
+          -1.0
+        ],
+        "Rotation": [
+          0,
+          0,
+          90
+        ],
+        "CompatibleTypes": [
+          "Wheel"
+        ]
+      },
+      {
+        "Id": "roof_mount",
+        "Position": [
+          0,
+          1.0,
+          0
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "CompatibleTypes": [
+          "Weapon",
+          "Utility"
+        ]
+      },
+      {
+        "Id": "cockpit_mount",
+        "Position": [
+          0,
+          0.5,
+          0.0
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "CompatibleTypes": [
+          "Cockpit"
+        ]
+      },
+      {
+        "Id": "engine_mount",
+        "Position": [
+          0,
+          0.5,
+          -1.2
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "CompatibleTypes": [
+          "Engine"
+        ]
+      },
+      {
+        "Id": "side_l_mount",
+        "Position": [
+          -0.7,
+          0.5,
+          0
+        ],
+        "Rotation": [
+          0,
+          0,
+          90
+        ],
+        "CompatibleTypes": [
+          "Utility"
+        ]
+      },
+      {
+        "Id": "side_r_mount",
+        "Position": [
+          0.7,
+          0.5,
+          0
+        ],
+        "Rotation": [
+          0,
+          0,
+          -90
+        ],
+        "CompatibleTypes": [
+          "Utility"
+        ]
+      },
+      {
+        "Id": "rear_storage_mount",
+        "Position": [
+          0,
+          0.5,
+          -1.4
+        ],
+        "Rotation": [
+          0,
+          0,
+          0
+        ],
+        "CompatibleTypes": [
+          "Utility"
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "wheel_standard_01",
+    "Name": "Stock Tyre",
+    "Description": "Standard rubber tyre. Reliable.",
+    "Type": 3,
+    "Category": "Wheel",
+    "Shape": "Cylinder",
+    "Scale": [
+      1.0,
+      0.5,
+      1.0
+    ],
+    "ColorHex": "#333333",
+    "ModelPath": "models/wheel_standard.glb",
+    "Mass": 10.0,
+    "Cost": 50
+  },
+  {
+    "Id": "wheel_monster_01",
+    "Name": "Monster Tyre",
+    "Description": "Huge offroad tire.",
+    "Type": 3,
+    "Category": "Wheel",
+    "Shape": "Cylinder",
+    "Scale": [
+      1.5,
+      0.8,
+      1.5
+    ],
+    "ColorHex": "#1a1a1a",
+    "ModelPath": "models/wheel_monster.glb",
+    "Mass": 40.0,
+    "Cost": 120
+  },
+  {
+    "Id": "weapon_mg_01",
+    "Name": "Pea Shooter",
+    "Description": "Basic machine gun.",
+    "Type": 4,
+    "Category": "Weapon",
+    "Shape": "Cylinder",
+    "VisualRotation": [
+      90,
+      0,
+      0
+    ],
+    "Scale": [
+      0.1,
+      1.2,
+      0.1
+    ],
+    "ColorHex": "#555555",
+    "ModelPath": "models/weapon_mg.glb",
+    "Mass": 25.0,
+    "Cost": 150
+  },
+  {
+    "Id": "weapon_cannon_01",
+    "Name": "Scrap Cannon",
+    "Description": "Heavy hitter.",
+    "Type": 4,
+    "Category": "Weapon",
+    "Shape": "Cylinder",
+    "VisualRotation": [
+      90,
+      0,
+      0
+    ],
+    "Scale": [
+      0.3,
+      2.0,
+      0.3
+    ],
+    "ColorHex": "#222222",
+    "ModelPath": "models/weapon_cannon.glb",
+    "Mass": 80.0,
+    "Cost": 300
+  },
+  {
+    "Id": "cockpit_starter",
+    "Name": "Drivers Cage",
+    "Description": "Minimal protection. Better than nothing.",
+    "Type": 1,
+    "Category": "Cockpit",
+    "Shape": "Box",
+    "Scale": [
+      1.0,
+      0.6,
+      1.2
+    ],
+    "ColorHex": "#222222",
+    "ModelPath": "models/cockpit_basic.glb",
+    "Mass": 50.0,
+    "Cost": 0,
+    "Connectors": [
+      {
+        "Id": "roll_bar_f",
+        "Position": [
+          0,
+          0.3,
+          0.4
+        ],
+        "Rotation": [
+          90,
+          0,
+          0
+        ],
+        "CompatibleTypes": [
+          "Utility"
+        ]
+      },
+      {
+        "Id": "roll_bar_r",
+        "Position": [
+          0,
+          0.3,
+          -0.4
+        ],
+        "Rotation": [
+          90,
+          0,
+          0
+        ],
+        "CompatibleTypes": [
+          "Utility"
+        ]
+      }
+    ]
+  },
+  {
+    "Id": "engine_v6",
+    "Name": "Rusty V6",
+    "Description": "Solid mid-range power.",
+    "Type": 2,
+    "Category": "Engine",
+    "Shape": "Box",
+    "Scale": [
+      0.7,
+      0.5,
+      0.8
+    ],
+    "ColorHex": "#8b4513",
+    "ModelPath": "models/engine_v6.glb",
+    "Mass": 150.0,
+    "Cost": 200
+  },
+  {
+    "Id": "armor_plate_s",
+    "Name": "Scrap Plate",
+    "Description": "Bolted on metal sheet.",
+    "Type": 5,
+    "Category": "Utility",
+    "Shape": "Box",
+    "Scale": [
+      0.9,
+      0.05,
+      0.9
+    ],
+    "ColorHex": "#4a4a4a",
+    "ModelPath": "models/plate_small.glb",
+    "Mass": 20.0,
+    "Cost": 25
+  },
+  {
+    "Id": "storage_box",
+    "Name": "Ammo Crate",
+    "Description": "Extra loot space.",
+    "Type": 6,
+    "Category": "Utility",
+    "Shape": "Box",
+    "Scale": [
+      0.5,
+      0.4,
+      0.5
+    ],
+    "ColorHex": "#2e3b26",
+    "ModelPath": "models/crate_small.glb",
+    "Mass": 10.0,
+    "Cost": 50
+  },
+  {
+    "Id": "roll_bar_starter",
+    "Name": "Roll Bar",
+    "Description": "Protective steel loop.",
+    "Type": 5,
+    "Category": "Utility",
+    "Shape": "Torus",
+    "Scale": [
+      1.2,
+      1.0,
+      1.0
+    ],
+    "ColorHex": "#708090",
+    "Mass": 15.0,
+    "Cost": 40
+  }
+]

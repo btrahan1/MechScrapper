@@ -1,0 +1,223 @@
+@page "/garage"
+@implements IAsyncDisposable
+@using MechScrappers.Data
+@using System.Text.Json
+@inject IJSRuntime JS
+@inject HttpClient Http
+
+<PageTitle>Garage</PageTitle>
+
+<div class="garage-container">
+    <div class="sidebar">
+        <h3>Parts Inventory</h3>
+        @if (AvailableParts == null)
+        {
+            <p>Loading...</p>
+        }
+        else
+        {
+            <div class="part-list">
+                @foreach (var part in AvailableParts)
+                {
+                    <div class="part-card" draggable="true" 
+                         @ondragstart="@(() => HandleDragStart(part))"
+                         @ondragend="HandleDragEnd">
+                        <div class="part-name">@part.Name</div>
+                        <div class="part-cost">@part.Cost Scrip</div>
+                        <div class="part-type">@part.Type</div>
+                        <div class="part-icon">📦</div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+    
+    <div class="viewport" 
+         @ondragover:preventDefault 
+         @ondragenter:preventDefault
+         @ondrop="HandleDrop">
+        <div class="canvas-wrapper" style="width:100%; height:100%">
+            <canvas id="renderCanvas" style="width: 100%; height: 100%; touch-action: none;"></canvas>
+        </div>
+        
+        @if (DraggedPart != null)
+        {
+            <div style="position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,255,0,0.2); border: 1px solid green; padding: 5px; color: green; font-weight: bold; pointer-events: none; z-index: 1000;">
+                READY TO ATTACH: @DraggedPart.Name
+            </div>
+        }
+    </div>
+    
+    <div class="toolbar">
+        <button class="btn btn-primary" @onclick="LaunchWasteland" title="Drive your creation into the wasteland">Drive 🏎️</button>
+        <button class="btn btn-success" @onclick="SaveBlueprint" title="Save this build to your browser">Save 💾</button>
+        <button class="btn btn-info" @onclick="ImportBlueprint" title="Import a JSON blueprint from your computer">Import 📥</button>
+        <button class="btn btn-warning" @onclick="DownloadBlueprint" title="Download this build as a JSON file">Export 📤</button>
+        <button class="btn btn-secondary" @onclick="ClearVehicle" title="Reset to core chassis">Clear 🧹</button>
+    </div>
+</div>
+
+<style>
+    .garage-container {
+        display: flex;
+        height: 80vh; /* Adjust as needed */
+        width: 100%;
+        overflow: hidden;
+        border: 2px solid #444;
+    }
+    
+    .sidebar {
+        width: 250px;
+        background: #222;
+        color: #eee;
+        overflow-y: auto;
+        padding: 10px;
+        border-right: 1px solid #444;
+    }
+    
+    .part-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .viewport {
+        flex-grow: 1;
+        position: relative;
+        background: #000;
+    }
+    
+    .toolbar {
+        position: absolute;
+        bottom: 10px;
+        right: 10px;
+        background: rgba(0,0,0,0.5);
+        padding: 10px;
+        border-radius: 5px;
+        pointer-events: auto;
+    }
+    
+    .part-card {
+        background: #333;
+        padding: 10px;
+        cursor: grab;
+        border: 1px solid #555;
+        border-radius: 4px;
+        user-select: none;
+    }
+    
+    .part-card:hover {
+        background: #444;
+        border-color: #fca311;
+    }
+
+    .part-card:active {
+        cursor: grabbing;
+    }
+</style>
+
+@code {
+    private List<PartDef>? AvailableParts;
+    private PartDef? DraggedPart;
+    private DotNetObjectReference<Garage>? objRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            objRef = DotNetObjectReference.Create(this);
+            // Init the engine
+            await JS.InvokeVoidAsync("mechRenderer.initGarage", "renderCanvas", objRef);
+            
+            // Load parts list (for UI later)
+            AvailableParts = await Http.GetFromJsonAsync<List<PartDef>>("data/parts_manifest.json");
+            
+            // Pass manifest to renderer (so it knows about connectors)
+            if (AvailableParts != null)
+            {
+                await JS.InvokeVoidAsync("mechRenderer.setManifest", AvailableParts);
+            }
+
+            // Load and Render Default Vehicle
+            try {
+                // Priority: LocalStorage -> Starter Mech
+                var savedJson = await JS.InvokeAsync<string>("localStorage.getItem", "saved_assembly");
+                
+                if (!string.IsNullOrEmpty(savedJson)) {
+                    Console.WriteLine("C#: Loading saved assembly from LocalStorage.");
+                    await JS.InvokeVoidAsync("mechRenderer.loadAssembly", savedJson);
+                } else {
+                    var vehicleJson = await Http.GetStringAsync("data/starter_mech.json");
+                    await JS.InvokeVoidAsync("mechRenderer.loadAssembly", vehicleJson);
+                }
+            } catch (Exception ex) {
+                Console.WriteLine($"Error loading starter mech: {ex.Message}");
+            }
+            
+            StateHasChanged();
+        }
+    }
+    
+    private async Task HandleDragStart(PartDef part)
+    {
+        Console.WriteLine($"Drag Start: {part.Name} (ID: {part.Id}, Type: {part.Type})");
+        DraggedPart = part;
+        if(part != null)
+            await JS.InvokeVoidAsync("mechRenderer.showSnapPoints", part.Id);
+    }
+
+    private async Task HandleDragEnd()
+    {
+        Console.WriteLine($"Drag End: {(DraggedPart?.Id ?? "NULL")}");
+        // 500ms delay to ensure JS handlePartDrop receives the signal before DraggedPart is nullified
+        await Task.Delay(500); 
+        DraggedPart = null;
+        await JS.InvokeVoidAsync("mechRenderer.hideSnapPoints");
+    }
+
+    private async Task HandleDrop(DragEventArgs e)
+    {
+        Console.WriteLine($"C#: Drop Event - Mouse: ({e.ClientX}, {e.ClientY}), Part: {(DraggedPart?.Id ?? "NULL")}");
+        if (DraggedPart == null) 
+        {
+            Console.WriteLine("C#: Drop aborted - DraggedPart is NULL.");
+            return;
+        }
+        await JS.InvokeVoidAsync("mechRenderer.handlePartAssembly", DraggedPart.Id, (int)e.ClientX, (int)e.ClientY);
+    }
+    
+    private void LaunchWasteland()
+    {
+        // Navigate
+    }
+    
+    private async void ClearVehicle()
+    {
+        await JS.InvokeVoidAsync("mechRenderer.clearAssembly");
+    }
+
+    private async Task SaveBlueprint()
+    {
+        var json = await JS.InvokeAsync<string>("mechRenderer.getAssemblyData");
+        await JS.InvokeVoidAsync("localStorage.setItem", "saved_assembly", json);
+        Console.WriteLine("C#: Assembly saved to LocalStorage.");
+    }
+
+    private async Task DownloadBlueprint()
+    {
+        await JS.InvokeVoidAsync("mechRenderer.downloadAssembly", "my_custom_mech.json");
+    }
+
+    private async Task ImportBlueprint()
+    {
+        await JS.InvokeVoidAsync("mechRenderer.importAssembly");
+    }
+    
+    public async ValueTask DisposeAsync()
+    {
+        try {
+            await JS.InvokeVoidAsync("mechRenderer.dispose");
+        } catch { /* Ignore */ }
+        objRef?.Dispose();
+    }
+}
