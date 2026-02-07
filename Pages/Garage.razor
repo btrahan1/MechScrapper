@@ -4,6 +4,7 @@
 @using System.Text.Json
 @inject IJSRuntime JS
 @inject HttpClient Http
+@inject NavigationManager Navigation
 
 <PageTitle>Garage</PageTitle>
 
@@ -188,7 +189,7 @@
     
     private void LaunchWasteland()
     {
-        // Navigate
+        Navigation.NavigateTo("/wasteland");
     }
     
     private async void ClearVehicle()

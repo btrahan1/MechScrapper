@@ -1,5 +1,6 @@
 @page "/wasteland"
 @inject IJSRuntime JSRuntime
+@using MechScrappers.Data
 
 <PageTitle>The Wasteland</PageTitle>
 
@@ -198,7 +199,21 @@
             objRef = DotNetObjectReference.Create(this);
             var json = "";
             try {
-                 json = await Http.GetStringAsync("data/starter_mech.json");
+                // Priority: LocalStorage -> Starter Mech
+                var savedJson = await JSRuntime.InvokeAsync<string>("localStorage.getItem", "saved_assembly");
+                if (!string.IsNullOrEmpty(savedJson)) {
+                    json = savedJson;
+                    Console.WriteLine("C#: Loading custom mech into Wasteland.");
+                } else {
+                    json = await Http.GetStringAsync("data/starter_mech.json");
+                }
+                
+                // CRITICAL: Load manifest so the engine knows how to build the parts!
+                var manifest = await Http.GetFromJsonAsync<List<PartDef>>("data/parts_manifest.json");
+                if (manifest != null) {
+                    await JSRuntime.InvokeVoidAsync("mechRenderer.setManifest", manifest);
+                }
+
             } catch (Exception ex) { Console.WriteLine("Internal Load Warning: " + ex.Message); }
             
             await JSRuntime.InvokeVoidAsync("mechRenderer.init", "renderCanvas", objRef, json);

@@ -317,7 +317,41 @@
     "ColorHex": "#8b4513",
     "ModelPath": "models/engine_v6.glb",
     "Mass": 150.0,
-    "Cost": 200
+    "Cost": 200,
+    "Connectors": [
+      {
+        "Id": "exhaust_l",
+        "Position": [
+          -0.5,
+          0.4,
+          -1.4
+        ],
+        "Rotation": [
+          115,
+          0,
+          -12
+        ],
+        "CompatibleTypes": [
+          "Utility"
+        ]
+      },
+      {
+        "Id": "exhaust_r",
+        "Position": [
+          0.5,
+          0.4,
+          -1.4
+        ],
+        "Rotation": [
+          115,
+          0,
+          12
+        ],
+        "CompatibleTypes": [
+          "Utility"
+        ]
+      }
+    ]
   },
   {
     "Id": "armor_plate_s",
@@ -368,5 +402,26 @@
     "ColorHex": "#708090",
     "Mass": 15.0,
     "Cost": 40
+  },
+  {
+    "Id": "tailpipe_standard",
+    "Name": "Exhaust Pipe",
+    "Description": "Rusty tailpipe. Helps identify the rear!",
+    "Type": 5,
+    "Category": "Utility",
+    "Shape": "Cylinder",
+    "VisualRotation": [
+      90,
+      0,
+      0
+    ],
+    "Scale": [
+      0.1,
+      0.8,
+      0.1
+    ],
+    "ColorHex": "#777777",
+    "Mass": 5.0,
+    "Cost": 15
   }
 ]

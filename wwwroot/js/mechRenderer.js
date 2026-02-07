@@ -97,8 +97,10 @@ var mechRenderer = {
         var root = new BABYLON.TransformNode("AssemblyRoot", scene);
         var anchorMap = {};
 
+        var parts = data.Parts || data.parts || [];
+
         // PASS 0: Enrichment (Fill missing properties from Manifest)
-        data.Parts.forEach(p => {
+        parts.forEach(p => {
             var tid = p.TypeId || p.typeId;
             if (tid && this.manifest) {
                 var def = this.manifest.find(m => m.Id === tid || m.id === tid);
@@ -115,10 +117,10 @@ var mechRenderer = {
         });
 
         // Pass 1: Create Anchors & Visuals
-        data.Parts.forEach(p => {
+        parts.forEach(p => {
 
-            var anchor = new BABYLON.TransformNode(p.Id + "_anchor", scene);
-            anchorMap[p.Id] = anchor;
+            var anchor = new BABYLON.TransformNode((p.Id || p.id) + "_anchor", scene);
+            anchorMap[p.Id || p.id] = anchor;
 
             // 2. Build Mesh (Fully Enriched)
             var mesh = this.buildPartAssemblyMesh(p, scene);
@@ -133,10 +135,12 @@ var mechRenderer = {
         });
 
         // Pass 2: Hierarchy
-        data.Parts.forEach(p => {
-            var anchor = anchorMap[p.Id];
-            if (p.ParentId && anchorMap[p.ParentId]) {
-                anchor.parent = anchorMap[p.ParentId];
+        parts.forEach(p => {
+            var pid = p.Id || p.id;
+            var parid = p.ParentId || p.parentId;
+            var anchor = anchorMap[pid];
+            if (parid && anchorMap[parid]) {
+                anchor.parent = anchorMap[parid];
             } else {
                 anchor.parent = root;
             }
@@ -244,12 +248,22 @@ var mechRenderer = {
         this.assemblyRoot = this._buildAssembly(data, this.scene);
 
         // LOG AFTER BUILD so enrichment shows up
-        console.table(data.Parts.map(p => ({
+        var parts = data.Parts || data.parts || [];
+        console.table(parts.map(p => ({
             Id: p.Id || p.id,
             Category: p.Category || p.category || "Unknown",
             Shape: p.Shape || p.shape,
             Parent: p.ParentId || p.parentId
         })));
+
+        this.autoSaveToLocalStorage();
+    },
+
+    autoSaveToLocalStorage: function () {
+        if (this.assemblyData) {
+            localStorage.setItem("saved_assembly", JSON.stringify(this.assemblyData));
+            console.log("ASSEMBLY: Autosaved to LocalStorage");
+        }
     },
 
     clearAssembly: function () {
@@ -260,6 +274,7 @@ var mechRenderer = {
         if (cores.length > 0) {
             this.assemblyData.Parts = cores;
             this.loadAssembly(this.assemblyData);
+            this.autoSaveToLocalStorage();
         }
         console.log("Assembly cleared to Core.");
     },
@@ -293,6 +308,7 @@ var mechRenderer = {
             reader.onload = (re) => {
                 var json = re.target.result;
                 this.loadAssembly(json);
+                this.autoSaveToLocalStorage(); // Ensure import stick across reloads
                 if (onComplete) onComplete(json);
             };
             reader.readAsText(file);
@@ -588,15 +604,23 @@ var mechRenderer = {
         if (vehicleJson) {
             try {
                 var data = JSON.parse(vehicleJson);
-                console.log("Wasteland Spawning: " + data.name);
-                var builtRoot = this._buildVehicle(data, scene);
-                builtRoot.parent = this.vehicle;
-                this.chassis = builtRoot; // Is this enough? 
+                var parts = data.Parts || data.parts;
+                console.log("Wasteland Spawning: " + (data.name || "Custom Assembly"), "Parts Count:", parts ? parts.length : 0);
 
-                // We need to re-assign Guns?
-                // The JSON has MachineGunL/R. 
-                // We could traverse and finding them to attach particles.
-                // For now, let's just make the car appear.
+                var builtRoot = this._buildAssembly(data, scene);
+                builtRoot.parent = this.vehicle;
+                this.chassis = builtRoot;
+
+                // Re-assign Gun nodes for combat system
+                // We look for parts with IDs or Names containing GunL/GunR
+                this.scene.executeWhenReady(() => {
+                    var gunL = this.scene.getTransformNodeByName("MachineGunL_anchor");
+                    var gunR = this.scene.getTransformNodeByName("MachineGunR_anchor");
+                    if (gunL) { this.leftGun.dispose(); this.leftGun = gunL; }
+                    if (gunR) { this.rightGun.dispose(); this.rightGun = gunR; }
+                    console.log("ASSEMBLY: Combat nodes assigned.", { gunL: !!gunL, gunR: !!gunR });
+                });
+
             } catch (e) {
                 console.error("Failed to spawn JSON vehicle", e);
             }
